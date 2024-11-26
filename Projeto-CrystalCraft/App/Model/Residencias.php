@@ -3,10 +3,12 @@
 class Residencias{
 
     public string $idResidencia;
-    public int $numResidencia;
-    public string $bloco;
-    public Moradores $idMorador;
+    private int $numResidencia;
+    private string $bloco;
+    public array $moradores = [];
     
+
+  
 
     public function getIdResidencia():string
     {

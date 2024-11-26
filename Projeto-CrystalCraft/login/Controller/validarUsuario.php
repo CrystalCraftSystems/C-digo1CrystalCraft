@@ -1,9 +1,12 @@
 <?php
 
+
 class validarUsuario
 {
     public function retornar()
     {
+        
+
         if ($_POST['idUsuario'] == "") {
             $mensagem = '
         <div class="notification is-danger">
@@ -36,20 +39,25 @@ class validarUsuario
         if (empty($usuarioExiste)) {
             die("Este usuário não existe!");
         }
-
+        $_SESSION['login'] = true;
         $mensagem = '
     <div class="notification is-success">
         <button class="delete"></button>
             Usuário logado
     </div>';
         echo $mensagem;
-
+        $usuarios = (new UsuariosBanco())->ListarUsuario();
 
         $user = (new UsuariosBanco())->verificarSeAdmin($_POST['idUsuario']);
+        
         if ($user) {
-           require __DIR__."/../../Administrador/Public/usuariosAdm.php";
+           $_SESSION['login']=true;
+           $_SESSION['adm'] = true;
+           
         } else {
-            require __DIR__."/../../UsuarioComum/Public/inicio.php";
+            $_SESSION['login']=true; // É uma variavel global inicializada pela sessão
+            $_SESSION['adm'] = false;
+           
         }
 
     }

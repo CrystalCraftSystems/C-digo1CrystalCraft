@@ -1,5 +1,4 @@
 <?php
-require __DIR__ . "/Usuarios.php";
 
 class UsuariosBanco
 {
@@ -13,8 +12,11 @@ class UsuariosBanco
     }
 
      public function cadastrarUsuario($idUsuario,$nomeUsuario, $senha,$emailUsuario, $cpfUsuario, $dataNascimentoUsuario, $permissaoEspecial){
-      $sql = "INSERT INTO usuario(idusuario, nomeusuario,senha, emailusuario, cpfusuario, datanascimentousuario, permissaoespecial) values (:i,:n,:s,:e,:c,:d,:p)";
+      $sql = "INSERT INTO usuarios(idusuario, nomeusuario,senha, emailusuario, cpfusuario, datanascimentousuario, permissaoespecial) values (:i,:n,:s,:e,:c,:d,:p)";
 
+      $originalDate = $dataNascimentoUsuario;
+      $dataNascimentoUsuario = date("Y-m-d", strtotime($originalDate));
+      
       $comando = $this->pdo->prepare($sql);
       $comando->bindValue("i",$idUsuario);
       $comando->bindValue("n",$nomeUsuario);
@@ -22,7 +24,7 @@ class UsuariosBanco
       $comando->bindValue("e",$emailUsuario);
       $comando->bindValue("c",$cpfUsuario);
       $comando->bindValue("d",$dataNascimentoUsuario);
-      $comando->bindValue("p",$permissaoEspecial);
+      $comando->bindValue("p",$permissaoEspecial,PDO::PARAM_BOOL );
 
 
      return $comando->execute();
@@ -79,7 +81,7 @@ class UsuariosBanco
 
     public function hidratarSomenteUm($array)
     {
-
+    
         $usuario = new Usuarios();
         $usuario->setIdUsuario($array['IDUSUARIO']);
         $usuario->setNomeUsuario($array['NOMEUSUARIO']);
@@ -89,19 +91,69 @@ class UsuariosBanco
         $usuario->setDataNascimentoUsuario($array['DATANASCIMENTOUSUARIO']);
         $usuario->setPermissaoEspecial($array['PERMISSAOESPECIAL']);
 
-        return $usuario;
+       
+       return $usuario;
     }
+
+    public function buscarPorIdUsuario($idUsuario){
+        $sql = "SELECT * FROM usuarios WHERE idUsuario=:i";
+
+        $comando = $this->pdo->prepare($sql);
+        $comando->bindValue("i",$idUsuario);
+        $comando->execute();
+        $resultado = $comando->fetch(PDO::FETCH_ASSOC);
+
+        return $this->hidratarSomenteUm($resultado);
+    }
+public function ListarUsuario(){
+
+ $sql = "SELECT * FROM usuarios";
+ $comando = $this->pdo->prepare($sql);
+ $comando->execute();
+ $todosUsuarios = $comando->fetchAll(PDO::FETCH_ASSOC);
+ return $this->hidratar($todosUsuarios) ;
+
+ }
+
+ public function EditarUsuario($idUsuario,$nomeUsuario,$senha,$emailUsuario, $cpfUsuario, $dataNascimentoUsuario, $permissaoEspecial){
+    $sql = "INSERT INTO usuarios(idusuarios,nomeusuario,senha,emailusuario,cpfusuario,datanascimentousuario,permissaoespecial) values (:i,:n,:s,:e,:c,:d,:p)";
+
+    $comando = $this->pdo->prepare($sql);
+    $comando->bindValue("i",$idUsuario);
+    $comando->bindValue("n",$nomeUsuario);
+    $comando->bindValue("s",$senha);
+    $comando->bindValue("e",$emailUsuario);
+    $comando->bindValue("c",$cpfUsuario);
+    $comando->bindValue("d",$dataNascimentoUsuario);
+    $comando->bindValue("p",$permissaoEspecial,PDO::PARAM_BOOL);
+
+    return $comando->execute();
 }
 
-// public function listarUsuario(){
-// $sql = "SELECT * FROM usuario";
-//  $comando = $this->pdo->prepare($sql);
+public function AtualizarUsuario($idUsuario,$nomeUsuario,$senha,$emailUsuario, $cpfUsuario, $dataNascimentoUsuario, $permissaoEspecial){
+    $sql = "UPDATE usuarios set nomeusuario = :n, senha= :s, emailusuario=:e, cpfusuario=:c, datanascimentousuario=:d,  permissaoespecial = :p where idusuario = :i";
 
-//  $comando->execute();
-// $todosUsuarios = $comando->fetchAll(PDO::FETCH_ASSOC);
+    $comando = $this->pdo->prepare($sql);
+    $comando->bindValue("i",$idUsuario);
+    $comando->bindValue("n",$nomeUsuario);
+    $comando->bindValue("s",$senha);
+    $comando->bindValue("e",$emailUsuario);
+    $comando->bindValue("c",$cpfUsuario);
+    $comando->bindValue("d",$dataNascimentoUsuario);
+    $comando->bindValue("p",$permissaoEspecial,PDO::PARAM_BOOL);
 
-//  return $this->hidratar($todosUsuarios) ;
-// }
+    return $comando->execute();
+}
+
+public function ExcluirUsuario($idUsuario){
+    $sql = "DELETE FROM usuarios WHERE idusuario = :i";
+
+    $comando = $this->pdo->prepare($sql);
+    $comando->bindValue("i",$idUsuario);
+
+    return $comando->execute();
+}
+}
 
 
 
